@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,22 +7,128 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Modelo para items (puedes adaptar campos según tu necesidad)
-model Item {
-  id          Int      @id @default(autoincrement())
-  name        String
-  description String?
-  createdAt   DateTime @default(now()) @map("created_at")
-  
-  @@map("items")
+model Category {
+  categoryId BigInt   @id @default(autoincrement()) @map("category_id")
+  name       String   @unique
+
+  // Relaciones
+  investorPreferences InvestorPreference[]
+  ventureCategories   VentureCategory[]
+
+  @@map("categories")
 }
 
 model User {
-  id         Int      @id @default(autoincrement())
-  email      String   @unique
-  password   String
-  name       String?
-  createdAt  DateTime @default(now()) @map("created_at")
-  
+  userId    String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid @map("user_id")
+  name      String?
+  email     String   @unique
+  role      String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  entrepreneurProfile EntrepreneurProfile?
+  investorProfile     InvestorProfile?
+  ventures            Venture[]        @relation("entrepreneur") // Solo el nombre de la relación
+  connectionsAsInvestor Connection[]   @relation("investor")
+  investorPreferences  InvestorPreference[]
+
   @@map("users")
 }
+
+model EntrepreneurProfile {
+  userId       String   @id @db.Uuid @map("user_id")
+  nameGiven    String?  @map("name_given")
+  surname      String?
+  dni          String?
+  dateOfBirth  DateTime? @map("date_of_birth")
+
+  // Relaciones
+  user         User     @relation(fields: [userId], references: [userId])
+
+  @@map("entrepreneur_profiles")
+}
+
+model InvestorProfile {
+  userId                String   @id @db.Uuid @map("user_id")
+  enrollmentNumber      String?  @map("enrollment_number")
+  cuitOrCuil            String?  @map("cuit_or_cuil")
+  lastNameCompanyName   String?  @map("last_name_company_name")
+  ticketMin             Int?     @map("ticket_min")
+  ticketMax             Int?     @map("ticket_max")
+
+  // Relaciones
+  user                  User     @relation(fields: [userId], references: [userId])
+
+  @@map("investor_profiles")
+}
+
+model Venture {
+  ventureId        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid @map("venture_id")
+  entrepreneurId   String   @db.Uuid @map("entrepreneur_id")
+  logo             String?
+  name             String
+  location         String?
+  ventureEmail     String?  @map("venture_email")
+  venturePhone     String?  @map("venture_phone")
+  website          String?
+  videoPitch       String?  @map("video_pitch")
+  summary          String?
+  problem          String?
+  solution         String?
+  differentiator   String?
+  targetMarket     String?  @map("target_market")
+  amountRequested  Int?     @map("amount_requested")
+  equityOffered    Decimal? @map("equity_offered")
+  valuation        Decimal?
+  useOfFunds       String?  @map("use_of_funds")
+  createdAt        DateTime @default(now()) @map("created_at")
+  fechaCreacion    DateTime? @map("fecha_creacion")
+
+  entrepreneur     User     @relation("entrepreneur", fields: [entrepreneurId], references: [userId])
+  connections      Connection[] @relation("connections")
+  ventureCategories VentureCategory[]
+
+  @@map("venture")
+}
+
+model Connection {
+  id          BigInt   @id @default(autoincrement())
+  ventureId   String   @db.Uuid @map("venture_id")
+  investorId  String   @db.Uuid @map("investor_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  venture     Venture  @relation("connections", fields: [ventureId], references: [ventureId])
+  investor    User     @relation("investor", fields: [investorId], references: [userId])
+
+  @@map("connections")
+}
+
+model InvestorPreference {
+  investorId  String   @db.Uuid @map("investor_id")
+  categoryId  BigInt   @map("category_id")
+
+  // Relaciones
+  investor    User     @relation(fields: [investorId], references: [userId])
+  category    Category @relation(fields: [categoryId], references: [categoryId])
+
+  @@id([investorId, categoryId])
+  @@map("investor_preferences")
+}
+
+model VentureCategory {
+  ventureId   String   @db.Uuid @map("venture_id")
+  categoryId  BigInt   @map("category_id")
+
+  // Relaciones
+  venture     Venture  @relation(fields: [ventureId], references: [ventureId])
+  category    Category @relation(fields: [categoryId], references: [categoryId])
+
+  @@id([ventureId, categoryId])
+  @@map("venture_categories")
+}
+
+
+// enum Role {
+//   Admin
+//   entrepreneur
+//   investor
+// }
