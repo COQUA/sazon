@@ -23,7 +23,7 @@ model User {
   name      String?
   email     String   @unique
   password  String 
-  role      String
+  role      Role     @default(entrepreneur)      
   createdAt DateTime @default(now()) @map("created_at")
 
   entrepreneurProfile EntrepreneurProfile?
@@ -128,8 +128,8 @@ model VentureCategory {
 }
 
 
-// enum Role {
-//   admin
-//   entrepreneur
-//   investor
-// }
+enum Role {
+  admin
+  entrepreneur
+  investor
+}
