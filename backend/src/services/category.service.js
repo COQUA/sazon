@@ -6,16 +6,40 @@ import prisma from '../config/prisma.js';
  */
 export async function getAllCategories() {
   const categories = await prisma.category.findMany({
+<<<<<<< HEAD
+    include: {
+      investorPreferences: true,
+      ventureCategories: true
+    },
+=======
+>>>>>>> 7c59cdff2dca68f4df5a55c949e780d2617986f1
     orderBy: {
       name: 'asc'
     }
   });
+<<<<<<< HEAD
+  function convertBigInts(obj) {
+    if (Array.isArray(obj)) return obj.map(convertBigInts);
+    if (obj && typeof obj === 'object') {
+      const out = {};
+      for (const [k, v] of Object.entries(obj)) {
+        if (typeof v === 'bigint') out[k] = v.toString();
+        else if (Array.isArray(v) || (v && typeof v === 'object')) out[k] = convertBigInts(v);
+        else out[k] = v;
+      }
+      return out;
+    }
+    return obj;
+  }
+  return categories.map(convertBigInts);
+=======
   
   // Convertir BigInt a string para JSON
   return categories.map(cat => ({
     ...cat,
     categoryId: cat.categoryId.toString()
   }));
+>>>>>>> 7c59cdff2dca68f4df5a55c949e780d2617986f1
 }
 
 /**
@@ -24,6 +48,29 @@ export async function getAllCategories() {
  */
 export async function getCategoryById(categoryId) {
   const category = await prisma.category.findUnique({
+<<<<<<< HEAD
+    where: { categoryId: BigInt(categoryId) },
+    include: {
+      investorPreferences: true,
+      ventureCategories: true
+    }
+  });
+  if (!category) return null;
+  function convertBigInts(obj) {
+    if (Array.isArray(obj)) return obj.map(convertBigInts);
+    if (obj && typeof obj === 'object') {
+      const out = {};
+      for (const [k, v] of Object.entries(obj)) {
+        if (typeof v === 'bigint') out[k] = v.toString();
+        else if (Array.isArray(v) || (v && typeof v === 'object')) out[k] = convertBigInts(v);
+        else out[k] = v;
+      }
+      return out;
+    }
+    return obj;
+  }
+  return convertBigInts(category);
+=======
     where: { categoryId: BigInt(categoryId) }
   });
   
@@ -33,6 +80,7 @@ export async function getCategoryById(categoryId) {
     ...category,
     categoryId: category.categoryId.toString()
   };
+>>>>>>> 7c59cdff2dca68f4df5a55c949e780d2617986f1
 }
 
 /**

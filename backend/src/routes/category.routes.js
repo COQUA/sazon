@@ -5,8 +5,8 @@ import { isAuthenticated } from '../controller/auth.controller.js';
 const router = express.Router();
 
 
-router.get('/', ctrl.getAllCategories);
 router.get('/:categoryId', ctrl.getCategoryById);
+router.get('/', ctrl.getAllCategories);
 
 
 router.post('/', isAuthenticated, ctrl.createCategory);
