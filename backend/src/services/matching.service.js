@@ -8,7 +8,7 @@ import prisma from '../config/prisma.js';
 export async function getSuggestedVentures(investorId) {
   // Obtenemos las preferencias del inversor
   const preferences = await prisma.investorPreference.findMany({
-    where: { investor_id: investorId }
+    where: { investorId: investorId }
   });
 
   // Si no tiene preferencias, no podemos sugerir nada
@@ -17,13 +17,13 @@ export async function getSuggestedVentures(investorId) {
   }
 
   // Obtenemos los IDs de categorías que prefiere el inversor
-  const preferredCategoryIds = preferences.map(pref => pref.category_id);
+  const preferredCategoryIds = preferences.map(pref => pref.categoryId);
 
   // Obtenemos los IDs de ventures con los que ya tiene conexión
   const connections = await prisma.connection.findMany({
-    where: { investor_id: investorId }
+    where: { investorId: investorId }
   });
-  const connectedVentureIds = connections.map(conn => conn.venture_id);
+  const connectedVentureIds = connections.map(conn => conn.ventureId);
 
   // Buscamos ventures que:
   // 1. Tengan al menos una categoría que coincida con las preferencias
@@ -34,7 +34,7 @@ export async function getSuggestedVentures(investorId) {
         {
           ventureCategories: {
             some: {
-              category_id: {
+              categoryId: {
                 in: preferredCategoryIds
               }
             }
@@ -80,7 +80,7 @@ export async function getSuggestedVentures(investorId) {
       email: venture.entrepreneur.email
     },
     categories: venture.ventureCategories.map(vc => ({
-      id: vc.category.categoryId,
+      id: vc.category.categoryId.toString(),
       name: vc.category.name
     }))
   }));
@@ -105,8 +105,8 @@ export async function createConnection(investorId, ventureId) {
   // Verificamos que no exista ya una conexión
   const existingConnection = await prisma.connection.findFirst({
     where: {
-      investor_id: investorId,
-      venture_id: ventureId
+      investorId: investorId,
+      ventureId: ventureId
     }
   });
 
@@ -117,8 +117,8 @@ export async function createConnection(investorId, ventureId) {
   // Creamos la conexión
   const connection = await prisma.connection.create({
     data: {
-      investor_id: investorId,
-      venture_id: ventureId
+      investorId: investorId,
+      ventureId: ventureId
     },
     include: {
       venture: {
@@ -144,7 +144,7 @@ export async function createConnection(investorId, ventureId) {
  */
 export async function getInvestorConnections(investorId) {
   const connections = await prisma.connection.findMany({
-    where: { investor_id: investorId },
+    where: { investorId: investorId },
     include: {
       venture: {
         include: {
@@ -168,7 +168,7 @@ export async function getInvestorConnections(investorId) {
 
   // Simplificamos la estructura para el frontend
   return connections.map(conn => ({
-    id: conn.id,
+    id: conn.id.toString(),
     createdAt: conn.createdAt,
     venture: {
       id: conn.venture.ventureId,
@@ -182,7 +182,7 @@ export async function getInvestorConnections(investorId) {
         email: conn.venture.entrepreneur.email
       },
       categories: conn.venture.ventureCategories.map(vc => ({
-        id: vc.category.categoryId,
+        id: vc.category.categoryId.toString(),
         name: vc.category.name
       }))
     }

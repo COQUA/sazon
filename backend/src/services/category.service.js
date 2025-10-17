@@ -5,11 +5,17 @@ import prisma from '../config/prisma.js';
  * @returns {Promise<Array>} Lista de categorías
  */
 export async function getAllCategories() {
-  return await prisma.category.findMany({
+  const categories = await prisma.category.findMany({
     orderBy: {
       name: 'asc'
     }
   });
+  
+  // Convertir BigInt a string para JSON
+  return categories.map(cat => ({
+    ...cat,
+    categoryId: cat.categoryId.toString()
+  }));
 }
 
 /**
@@ -17,9 +23,16 @@ export async function getAllCategories() {
  * @returns {Promise<Object>} 
  */
 export async function getCategoryById(categoryId) {
-  return await prisma.category.findUnique({
+  const category = await prisma.category.findUnique({
     where: { categoryId: BigInt(categoryId) }
   });
+  
+  if (!category) return null;
+  
+  return {
+    ...category,
+    categoryId: category.categoryId.toString()
+  };
 }
 
 /**
@@ -29,7 +42,8 @@ export async function getCategoryById(categoryId) {
  */
 export async function createCategory(categoryData) {
   const { name } = categoryData;
-
+  
+  // Verificar que no exista ya una categoría con el mismo nombre
   const existingCategory = await prisma.category.findUnique({
     where: { name }
   });
@@ -38,9 +52,14 @@ export async function createCategory(categoryData) {
     throw new Error('Ya existe una categoría con ese nombre');
   }
   
-  return await prisma.category.create({
+  const category = await prisma.category.create({
     data: { name }
   });
+  
+  return {
+    ...category,
+    categoryId: category.categoryId.toString()
+  };
 }
 
 /**
@@ -51,7 +70,8 @@ export async function createCategory(categoryData) {
  */
 export async function updateCategory(categoryId, categoryData) {
   const { name } = categoryData;
-
+  
+  // Verificar que la categoría existe
   const existingCategory = await prisma.category.findUnique({
     where: { categoryId: BigInt(categoryId) }
   });
@@ -60,7 +80,7 @@ export async function updateCategory(categoryId, categoryData) {
     return null;
   }
   
-
+  // Si se proporciona un nuevo nombre, verificar que no esté duplicado
   if (name) {
     const duplicateCategory = await prisma.category.findUnique({
       where: { name }
@@ -71,10 +91,15 @@ export async function updateCategory(categoryId, categoryData) {
     }
   }
   
-  return await prisma.category.update({
+  const updatedCategory = await prisma.category.update({
     where: { categoryId: BigInt(categoryId) },
     data: { name }
   });
+  
+  return {
+    ...updatedCategory,
+    categoryId: updatedCategory.categoryId.toString()
+  };
 }
 
 /**
