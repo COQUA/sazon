@@ -11,9 +11,22 @@ export async function list(req, res, next) {
 
 export async function create(req, res, next) {
   try {
+
+    if (req.user.role !== 'entrepreneur' && req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Solo los emprendedores pueden crear emprendimientos' });
+    }
+    
+
+    let entrepreneurId = req.user.userId;
+    
+
+    if (req.user.role === 'admin' && req.body.entrepreneurId) {
+      entrepreneurId = req.body.entrepreneurId;
+    }
+    
     const ventureData = {
       ...req.body,
-      entrepreneurId: req.user.userId
+      entrepreneurId
     };
     
     const venture = await service.create(ventureData);
@@ -40,7 +53,11 @@ export async function update(req, res, next) {
       return res.status(404).json({ error: 'Emprendimiento no encontrado' });
     }
     
-    if (existingVenture.entrepreneurId !== req.user.userId) {
+
+    const isOwner = existingVenture.entrepreneurId === req.user.userId;
+    const isAdmin = req.user.role === 'admin';
+    
+    if (!isOwner && !isAdmin) {
       return res.status(403).json({ error: 'No autorizado para modificar este emprendimiento' });
     }
     
@@ -58,7 +75,11 @@ export async function remove(req, res, next) {
       return res.status(404).json({ error: 'Emprendimiento no encontrado' });
     }
     
-    if (existingVenture.entrepreneurId !== req.user.userId) {
+
+    const isOwner = existingVenture.entrepreneurId === req.user.userId;
+    const isAdmin = req.user.role === 'admin';
+    
+    if (!isOwner && !isAdmin) {
       return res.status(403).json({ error: 'No autorizado para eliminar este emprendimiento' });
     }
     
