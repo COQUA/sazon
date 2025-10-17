@@ -5,11 +5,29 @@ import prisma from '../config/prisma.js';
  * @returns {Promise<Array>} Lista de categorías
  */
 export async function getAllCategories() {
-  return await prisma.category.findMany({
+  const categories = await prisma.category.findMany({
+    include: {
+      investorPreferences: true,
+      ventureCategories: true
+    },
     orderBy: {
       name: 'asc'
     }
   });
+  function convertBigInts(obj) {
+    if (Array.isArray(obj)) return obj.map(convertBigInts);
+    if (obj && typeof obj === 'object') {
+      const out = {};
+      for (const [k, v] of Object.entries(obj)) {
+        if (typeof v === 'bigint') out[k] = v.toString();
+        else if (Array.isArray(v) || (v && typeof v === 'object')) out[k] = convertBigInts(v);
+        else out[k] = v;
+      }
+      return out;
+    }
+    return obj;
+  }
+  return categories.map(convertBigInts);
 }
 
 /**
@@ -17,9 +35,28 @@ export async function getAllCategories() {
  * @returns {Promise<Object>} 
  */
 export async function getCategoryById(categoryId) {
-  return await prisma.category.findUnique({
-    where: { categoryId: BigInt(categoryId) }
+  const category = await prisma.category.findUnique({
+    where: { categoryId: BigInt(categoryId) },
+    include: {
+      investorPreferences: true,
+      ventureCategories: true
+    }
   });
+  if (!category) return null;
+  function convertBigInts(obj) {
+    if (Array.isArray(obj)) return obj.map(convertBigInts);
+    if (obj && typeof obj === 'object') {
+      const out = {};
+      for (const [k, v] of Object.entries(obj)) {
+        if (typeof v === 'bigint') out[k] = v.toString();
+        else if (Array.isArray(v) || (v && typeof v === 'object')) out[k] = convertBigInts(v);
+        else out[k] = v;
+      }
+      return out;
+    }
+    return obj;
+  }
+  return convertBigInts(category);
 }
 
 /**

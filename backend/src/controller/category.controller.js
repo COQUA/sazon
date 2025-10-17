@@ -11,14 +11,12 @@ export async function getAllCategories(req, res, next) {
 
 export async function getCategoryById(req, res, next) {
   try {
+    console.log('getCategoryById params:', req.params);
     const { categoryId } = req.params;
-    
     const category = await service.getCategoryById(categoryId);
-    
     if (!category) {
       return res.status(404).json({ error: 'Categoría no encontrada' });
     }
-    
     res.json(category);
   } catch (error) { next(error); }
 }
@@ -31,8 +29,13 @@ export async function createCategory(req, res, next) {
     }
     
     const categoryData = req.body;
-    const result = await service.createCategory(categoryData);
-    res.status(201).json(result);
+    const newCategory = await service.createCategory(categoryData);
+    // Buscar la categoría recién creada con relaciones y BigInt serializados
+    const categoryDetail = await service.getCategoryById(newCategory.categoryId);
+    res.status(201).json({
+      message: 'Categoría creada exitosamente',
+      category: categoryDetail
+    });
   } catch (error) { next(error); }
 }
 
@@ -45,13 +48,16 @@ export async function updateCategory(req, res, next) {
     
     const { categoryId } = req.params;
     const categoryData = req.body;
-    const result = await service.updateCategory(categoryId, categoryData);
-    
-    if (!result) {
+    const updated = await service.updateCategory(categoryId, categoryData);
+    if (!updated) {
       return res.status(404).json({ error: 'Categoría no encontrada' });
     }
-    
-    res.json(result);
+    // Buscar la categoría actualizada con relaciones y BigInt serializados
+    const categoryDetail = await service.getCategoryById(categoryId);
+    res.json({
+      message: 'Categoría actualizada exitosamente',
+      category: categoryDetail
+    });
   } catch (error) { next(error); }
 }
 
@@ -64,12 +70,27 @@ export async function deleteCategory(req, res, next) {
     }
     
     const { categoryId } = req.params;
-    const result = await service.deleteCategory(categoryId);
-    
-    if (!result) {
+    const deleted = await service.deleteCategory(categoryId);
+    if (!deleted) {
       return res.status(404).json({ error: 'Categoría no encontrada' });
     }
-    
-    res.json({ message: 'Categoría eliminada correctamente' });
+    // Serializar BigInt de la categoría eliminada
+    function convertBigInts(obj) {
+      if (Array.isArray(obj)) return obj.map(convertBigInts);
+      if (obj && typeof obj === 'object') {
+        const out = {};
+        for (const [k, v] of Object.entries(obj)) {
+          if (typeof v === 'bigint') out[k] = v.toString();
+          else if (Array.isArray(v) || (v && typeof v === 'object')) out[k] = convertBigInts(v);
+          else out[k] = v;
+        }
+        return out;
+      }
+      return obj;
+    }
+    res.json({
+      message: 'Categoría eliminada correctamente',
+      category: convertBigInts(deleted)
+    });
   } catch (error) { next(error); }
 }
