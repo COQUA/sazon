@@ -1,0 +1,85 @@
+{
+  "info": {
+    "_postman_id": "matching-api-2025",
+    "name": "Sazon Matching API",
+    "description": "Colección para probar endpoints de matching (sugerencias, conectar, conexiones) en Sazon.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{base_url}}/health", "host": ["{{base_url}}"], "path": ["health"] }
+      }
+    },
+    {
+      "name": "Registrar Investor",
+      "event": [{
+        "listen": "test",
+        "script": {
+          "exec": [
+            "if (pm.response.code === 201) {",
+            "  var jsonData = pm.response.json();",
+            "  pm.environment.set(\"investor_token\", jsonData.token);",
+            "  pm.environment.set(\"investor_userId\", jsonData.user.userId);",
+            "}"
+          ],
+          "type": "text/javascript"
+        }
+      }],
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {"mode": "raw", "raw": "{\n  \"email\": \"inversor@sazon.com\",\n  \"password\": \"inv123\",\n  \"name\": \"María Inversora\",\n  \"role\": \"investor\"\n}"},
+        "url": { "raw": "{{base_url}}/auth/register", "host": ["{{base_url}}"], "path": ["auth", "register"] }
+      }
+    },
+    {
+      "name": "Crear Perfil Investor",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{investor_token}}"}
+        ],
+        "body": {"mode": "raw", "raw": "{\n  \"enrollmentNumber\": \"INV-001\",\n  \"cuitOrCuil\": \"20-12345678-9\",\n  \"lastNameCompanyName\": \"Inversiones SA\",\n  \"ticketMin\": 50000,\n  \"ticketMax\": 200000,\n  \"categoryPreferences\": [\"1\", \"2\"]\n}"},
+        "url": { "raw": "{{base_url}}/profiles/investor/{{investor_userId}}", "host": ["{{base_url}}"], "path": ["profiles", "investor", "{{investor_userId}}"] }
+      }
+    },
+    {
+      "name": "Sugerencias de Ventures",
+      "request": {
+        "method": "GET",
+        "header": [{"key": "Authorization", "value": "Bearer {{investor_token}}"}],
+        "url": { "raw": "{{base_url}}/matching/suggestions", "host": ["{{base_url}}"], "path": ["matching", "suggestions"] }
+      }
+    },
+    {
+      "name": "Conectar con Venture",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{investor_token}}"}
+        ],
+        "body": {"mode": "raw", "raw": "{\n  \"ventureId\": \"<PEGA_AQUI_ID_DEL_VENTURE>\"\n}"},
+        "url": { "raw": "{{base_url}}/matching/connect", "host": ["{{base_url}}"], "path": ["matching", "connect"] }
+      }
+    },
+    {
+      "name": "Ver Mis Conexiones",
+      "request": {
+        "method": "GET",
+        "header": [{"key": "Authorization", "value": "Bearer {{investor_token}}"}],
+        "url": { "raw": "{{base_url}}/matching/connections", "host": ["{{base_url}}"], "path": ["matching", "connections"] }
+      }
+    }
+  ],
+  "variable": [
+    {"key": "base_url", "value": "http://localhost:4000/api", "type": "string"},
+    {"key": "investor_token", "value": "", "type": "string"},
+    {"key": "investor_userId", "value": "", "type": "string"}
+  ]
+}
