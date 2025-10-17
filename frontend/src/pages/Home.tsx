@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
 import { getAllVentures, type Venture } from "../services/VentureService";
 
@@ -6,6 +7,7 @@ export default function Home() {
     const [emprendimientos, setEmprendimientos] = useState<Venture[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const navigate = useNavigate();
 
     useEffect(() => {
         async function fetchVentures() {
@@ -67,7 +69,7 @@ export default function Home() {
                                     </div>
 
                                     <div className="flex flex-wrap items-center justify-between mt-4 text-sm text-gray-200">
-                                        <button className="bg-white text-[#0e2ee4] p-3 font-bold text-[1rem] rounded-full cursor-pointer hover:bg-[#0e2ee4] hover:text-white transition-all duration-300">
+                                        <button onClick={() => navigate(`/venture-detalle/${e.ventureId}`)} className="bg-white text-[#0e2ee4] p-3 font-bold text-[1rem] rounded-full cursor-pointer hover:bg-[#0e2ee4] hover:text-white transition-all duration-300">
                                             ¡Conocer más!
                                         </button>
                                     </div>

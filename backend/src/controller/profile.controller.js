@@ -20,6 +20,21 @@ export async function getEntrepreneurProfile(req, res, next) {
   } catch (error) { next(error); }
 }
 
+export async function getEntrepreneurProfilePublic(req, res, next) {
+  try {
+    const { userId } = req.params;
+    const profile = await service.getEntrepreneurProfile(userId);
+    if (!profile) return res.status(404).json({ error: 'Perfil no encontrado' });
+
+    res.json({
+      userId: profile.user.userId,
+      name: profile.user.name,
+      email: profile.user.email
+    });
+  } catch (error) { next(error); }
+}
+
+
 export async function createEntrepreneurProfile(req, res, next) {
   try {
     const { userId } = req.params;
@@ -72,7 +87,7 @@ export async function getInvestorProfile(req, res, next) {
 
 export async function createInvestorProfile(req, res, next) {
   try {
-     const { userId } = req.params;
+    const { userId } = req.params;
     if (req.user.role !== 'admin' && req.user.role !== 'investor') {
       return res.status(403).json({ error: 'Solo administradores o inversores pueden crear este perfil' });
     }

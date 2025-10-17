@@ -10,6 +10,7 @@ import ProtectedRoute from './components/ProtectedRoute'
 import EmprendimientoForm from './pages/EmprendimientoForm'
 import { AuthProvider } from './context/AuthContext'
 import EmprendimientoDetalle from './pages/EmprendimientoDetalle'
+import EmprendimientoDetalleInversionista from './pages/EmprendimientoDetalleInversionista'
 
 export default function App(){
     return(
@@ -59,6 +60,15 @@ export default function App(){
                         element={
                             <ProtectedRoute>
                                 <EmprendimientoDetalle/>
+                            </ProtectedRoute>
+                        }
+                    />
+
+                    <Route
+                        path="/venture-detalle/:id"
+                        element={
+                            <ProtectedRoute>
+                                <EmprendimientoDetalleInversionista />
                             </ProtectedRoute>
                         }
                     />

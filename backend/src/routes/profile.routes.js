@@ -12,6 +12,8 @@ router.put('/entrepreneur/:userId', isAuthenticated, ctrl.updateEntrepreneurProf
 router.get('/investor/:userId', isAuthenticated, ctrl.getInvestorProfile);
 router.post('/investor/:userId', isAuthenticated, ctrl.createInvestorProfile);
 router.put('/investor/:userId', isAuthenticated, ctrl.updateInvestorProfile);
+router.get('/entrepreneur/public/:userId', ctrl.getEntrepreneurProfilePublic);
+
 
 
 router.get('/investor/:userId/preferences', isAuthenticated, ctrl.getInvestorCategoryPreferences);
