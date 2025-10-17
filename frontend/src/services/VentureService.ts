@@ -67,3 +67,10 @@ export async function deleteVenture(ventureId: string) {
     });
     return res.status === 204;
 }
+
+export async function getAllVentures(){
+    const res = await api.get(`/ventures`,{
+        headers: getAuthHeaders(),
+    })
+    return res.data as Venture[];
+}
