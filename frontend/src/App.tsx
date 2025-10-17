@@ -7,7 +7,9 @@ import Home from './pages/Home'
 import MisEmprendimientos from './pages/MisEmprendimientos'
 import Perfil from './pages/Perfil'
 import ProtectedRoute from './components/ProtectedRoute'
+import EmprendimientoForm from './pages/EmprendimientoForm'
 import { AuthProvider } from './context/AuthContext'
+import EmprendimientoDetalle from './pages/EmprendimientoDetalle'
 
 export default function App(){
     return(
@@ -42,6 +44,34 @@ export default function App(){
                             <ProtectedRoute>
                                 <Perfil/>
                             </ProtectedRoute>}/>
+
+                    <Route
+                        path="/agregar-emprendimiento"
+                        element={
+                            <ProtectedRoute>
+                                <EmprendimientoForm/>
+                            </ProtectedRoute>
+                        }
+                    />
+
+                    <Route
+                        path="/emprendimiento/:id"
+                        element={
+                            <ProtectedRoute>
+                                <EmprendimientoDetalle/>
+                            </ProtectedRoute>
+                        }
+                    />
+
+                    <Route
+                        path="/editar-emprendimiento/:id"
+                        element={
+                            <ProtectedRoute>
+                                <EmprendimientoForm/>
+                            </ProtectedRoute>
+                        }
+                    />
+
                 </Routes>
             </BrowserRouter>
         </AuthProvider>

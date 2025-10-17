@@ -11,11 +11,9 @@ export async function list(req, res, next) {
 
 export async function create(req, res, next) {
   try {
-
     if (req.user.role !== 'entrepreneur' && req.user.role !== 'admin') {
       return res.status(403).json({ error: 'Solo los emprendedores pueden crear emprendimientos' });
     }
-    
 
     let entrepreneurId = req.user.userId;
     if (req.user.role === 'admin' && req.body.entrepreneurId) {
@@ -24,16 +22,22 @@ export async function create(req, res, next) {
     if (!entrepreneurId) {
       return res.status(400).json({ error: 'No se pudo determinar el entrepreneurId para el emprendimiento' });
     }
+
     const ventureData = {
       ...req.body,
       entrepreneurId
     };
+
+    console.log('Datos que se envían a service.create:', ventureData);
+
     const venture = await service.create(ventureData);
     res.status(201).json(venture);
   } catch (error) { 
+    console.error('Error en create controller:', error);
     next(error); 
   }
 }
+
 
 export async function getById(req, res, next) {
   try {
