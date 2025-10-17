@@ -104,17 +104,16 @@ export async function getInvestorProfile(userId) {
   }
   
   const preferences = await prisma.investorPreference.findMany({
-    where: { investor_id: userId },
+    where: { investorId: userId },
     include: {
       category: true
     }
   });
   
-
   return {
     ...profile,
     preferences: preferences.map(pref => ({
-      categoryId: pref.category.categoryId,
+      categoryId: pref.category.categoryId?.toString(),
       name: pref.category.name
     }))
   };
@@ -141,7 +140,6 @@ export async function createInvestorProfile(userId, profileData) {
   
 
   return await prisma.$transaction(async (prisma) => {
-
     const profile = await prisma.investorProfile.create({
       data: {
         userId,
@@ -163,9 +161,7 @@ export async function createInvestorProfile(userId, profileData) {
       }
     });
     
-
     if (categoryPreferences && categoryPreferences.length > 0) {
-
       const categories = await prisma.category.findMany({
         where: {
           categoryId: {
@@ -173,35 +169,28 @@ export async function createInvestorProfile(userId, profileData) {
           }
         }
       });
-      
       if (categories.length !== categoryPreferences.length) {
         throw new Error('Una o más categorías seleccionadas no existen');
       }
-      
-
       await Promise.all(categoryPreferences.map(categoryId => 
         prisma.investorPreference.create({
           data: {
-            investor_id: userId,
-            category_id: BigInt(categoryId)
+            investorId: userId,
+            categoryId: BigInt(categoryId)
           }
         })
       ));
     }
-    
-
     const preferences = await prisma.investorPreference.findMany({
-      where: { investor_id: userId },
+      where: { investorId: userId },
       include: {
         category: true
       }
     });
-    
-
     return {
       ...profile,
       preferences: preferences.map(pref => ({
-        categoryId: pref.category.categoryId,
+        categoryId: pref.category.categoryId?.toString(),
         name: pref.category.name
       }))
     };
@@ -229,7 +218,6 @@ export async function updateInvestorProfile(userId, profileData) {
   
  
   return await prisma.$transaction(async (prisma) => {
-
     const updatedProfile = await prisma.investorProfile.update({
       where: { userId },
       data: {
@@ -250,17 +238,11 @@ export async function updateInvestorProfile(userId, profileData) {
         }
       }
     });
-    
-
     if (categoryPreferences !== undefined) {
-
       await prisma.investorPreference.deleteMany({
-        where: { investor_id: userId }
+        where: { investorId: userId }
       });
-      
-
       if (categoryPreferences && categoryPreferences.length > 0) {
-
         const categories = await prisma.category.findMany({
           where: {
             categoryId: {
@@ -268,36 +250,29 @@ export async function updateInvestorProfile(userId, profileData) {
             }
           }
         });
-        
         if (categories.length !== categoryPreferences.length) {
           throw new Error('Una o más categorías seleccionadas no existen');
         }
-        
-
         await Promise.all(categoryPreferences.map(categoryId => 
           prisma.investorPreference.create({
             data: {
-              investor_id: userId,
-              category_id: BigInt(categoryId)
+              investorId: userId,
+              categoryId: BigInt(categoryId)
             }
           })
         ));
       }
     }
-    
-
     const preferences = await prisma.investorPreference.findMany({
-      where: { investor_id: userId },
+      where: { investorId: userId },
       include: {
         category: true
       }
     });
-    
-
     return {
       ...updatedProfile,
       preferences: preferences.map(pref => ({
-        categoryId: pref.category.categoryId,
+        categoryId: pref.category.categoryId?.toString(),
         name: pref.category.name
       }))
     };
@@ -325,14 +300,13 @@ export async function getInvestorCategoryPreferences(userId) {
   
 
   const preferences = await prisma.investorPreference.findMany({
-    where: { investor_id: userId },
+    where: { investorId: userId },
     include: {
       category: true
     }
   });
-  
   return preferences.map(pref => ({
-    categoryId: pref.category.categoryId,
+    categoryId: pref.category.categoryId?.toString(),
     name: pref.category.name
   }));
 }
@@ -368,14 +342,10 @@ export async function updateInvestorCategoryPreferences(userId, categoryIds) {
   
 
   return await prisma.$transaction(async (prisma) => {
-
     await prisma.investorPreference.deleteMany({
-      where: { investor_id: userId }
+      where: { investorId: userId }
     });
-    
-
     if (categoryIds && categoryIds.length > 0) {
-
       const categories = await prisma.category.findMany({
         where: {
           categoryId: {
@@ -383,32 +353,26 @@ export async function updateInvestorCategoryPreferences(userId, categoryIds) {
           }
         }
       });
-      
       if (categories.length !== categoryIds.length) {
         throw new Error('Una o más categorías seleccionadas no existen');
       }
-      
-
       await Promise.all(categoryIds.map(categoryId => 
         prisma.investorPreference.create({
           data: {
-            investor_id: userId,
-            category_id: BigInt(categoryId)
+            investorId: userId,
+            categoryId: BigInt(categoryId)
           }
         })
       ));
     }
-    
-
     const updatedPreferences = await prisma.investorPreference.findMany({
-      where: { investor_id: userId },
+      where: { investorId: userId },
       include: {
         category: true
       }
     });
-    
     return updatedPreferences.map(pref => ({
-      categoryId: pref.category.categoryId,
+      categoryId: pref.category.categoryId?.toString(),
       name: pref.category.name
     }));
   });

@@ -34,10 +34,10 @@ export async function createEntrepreneurProfile(req, res, next) {
 
 export async function updateEntrepreneurProfile(req, res, next) {
   try {
-    const { userId } = req.params;
     
-    if (req.user.userId !== userId && req.user.role !== 'admin') {
-      return res.status(403).json({ error: 'No tienes permisos para actualizar este perfil' });
+     const { userId } = req.params;
+    if (req.user.role !== 'admin' && req.user.role !== 'entrepreneur') {
+      return res.status(403).json({ error: 'Solo administradores o emprendedores pueden actualizar este perfil' });
     }
     
     const profileData = req.body;
@@ -86,9 +86,8 @@ export async function createInvestorProfile(req, res, next) {
 export async function updateInvestorProfile(req, res, next) {
   try {
     const { userId } = req.params;
-    
-    if (req.user.sub !== userId && req.user.role !== 'admin') {
-      return res.status(403).json({ error: 'No tienes permisos para actualizar este perfil' });
+    if (req.user.role !== 'admin' && req.user.role !== 'investor') {
+      return res.status(403).json({ error: 'Solo administradores o inversores pueden modificar este perfil' });
     }
     
     const profileData = req.body;
@@ -105,10 +104,10 @@ export async function updateInvestorProfile(req, res, next) {
 
 export async function getInvestorCategoryPreferences(req, res, next) {
   try {
-    const { userId } = req.params;
 
-    if (req.user.sub !== userId && req.user.role !== 'admin') {
-      return res.status(403).json({ error: 'No tienes permisos para acceder a estas preferencias' });
+    const { userId } = req.params;
+    if (req.user.role !== 'admin' && req.user.role !== 'investor') {
+      return res.status(403).json({ error: 'Solo administradores o inversores pueden acceder a esta sección' });
     }
     
     const preferences = await service.getInvestorCategoryPreferences(userId);
@@ -119,9 +118,8 @@ export async function getInvestorCategoryPreferences(req, res, next) {
 export async function updateInvestorCategoryPreferences(req, res, next) {
   try {
     const { userId } = req.params;
-    
-    if (req.user.sub !== userId && req.user.role !== 'admin') {
-      return res.status(403).json({ error: 'No tienes permisos para actualizar estas preferencias' });
+    if (req.user.role !== 'admin' && req.user.role !== 'investor') {
+      return res.status(403).json({ error: 'Solo administradores o inversores pueden actualizar en esta sección' });
     }
     
     const { categoryIds } = req.body;
