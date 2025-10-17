@@ -29,7 +29,21 @@ export async function createConnection(req, res, next) {
     }
     
     const result = await service.createConnection(investorId, ventureId);
-    res.status(201).json(result);
+    // Convertir BigInt a string en toda la respuesta
+    function convertBigInts(obj) {
+      if (Array.isArray(obj)) return obj.map(convertBigInts);
+      if (obj && typeof obj === 'object') {
+        const out = {};
+        for (const [k, v] of Object.entries(obj)) {
+          if (typeof v === 'bigint') out[k] = v.toString();
+          else if (Array.isArray(v) || (v && typeof v === 'object')) out[k] = convertBigInts(v);
+          else out[k] = v;
+        }
+        return out;
+      }
+      return obj;
+    }
+    res.status(201).json(convertBigInts(result));
   } catch (error) { next(error); }
 }
 
