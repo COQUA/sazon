@@ -2,6 +2,49 @@
 
 Este repositorio contiene un backend ligero en JavaScript (ESM) preparado para usarse con una base de datos PostgreSQL (ej. Supabase) y Prisma como ORM. Incluye rutas CRUD para `items` y un flujo básico de autenticación (registro/login) con bcrypt + JWT.
 
+## Estado actual
+ - Registro y login funcionando
+ - POST y PUT de perfil de emprendedor funcionando
+ - POST y PUT de perfil de inversor funcionando
+ - PUT de preferencias de inversor funcionando (solo para rol admin e inversor)
+## Endpoints principales
+
+- GET `/api/health` — healthcheck
+- Items (CRUD)
+  - GET `/api/items` — listar items
+  - POST `/api/items` — crear item
+    - Body JSON: `{ "name": "Mi item", "description": "opcional" }`
+  - GET `/api/items/:id` — obtener por id
+  - PUT `/api/items/:id` — actualizar (body JSON con campos a actualizar)
+  - DELETE `/api/items/:id` — eliminar
+
+- Auth
+  - POST `/api/auth/register` — registrar (body: `{ "email": "...", "password": "..." }`)
+  - POST `/api/auth/login` — login (retorna JWT)
+
+- Perfiles de emprendedor
+  - GET `/api/profiles/entrepreneur/:userId` — obtener perfil de emprendedor
+  - POST `/api/profiles/entrepreneur/:userId` — crear perfil de emprendedor
+    - Body JSON: `{ "nameGiven": "Juan", "surname": "Pérez", "dni": "12345678", "dateOfBirth": "1990-05-15" }`
+  - PUT `/api/profiles/entrepreneur/:userId` — actualizar perfil de emprendedor
+    - Body JSON: campos a actualizar
+
+- Perfiles de inversor
+  - GET `/api/profiles/investor/:userId` — obtener perfil de inversor
+  - POST `/api/profiles/investor/:userId` — crear perfil de inversor
+    - Body JSON: `{ "enrollmentNumber": "...", "cuitOrCuil": "...", "lastNameCompanyName": "...", "ticketMin": 1000, "ticketMax": 5000, "categoryPreferences": ["1", "2"] }`
+  - PUT `/api/profiles/investor/:userId` — actualizar perfil de inversor
+    - Body JSON: campos a actualizar
+
+- Preferencias de inversor
+  - GET `/api/profiles/investor/:userId/preferences` — obtener preferencias de categorías
+  - PUT `/api/profiles/investor/:userId/preferences` — actualizar preferencias de categorías
+    - Body JSON: `{ "categoryIds": ["1", "2", "3"] }`
+    - Solo accesible para rol admin e inversor
+# Backend reutilizable (JS) — Hackathon starter
+
+Este repositorio contiene un backend ligero en JavaScript (ESM) preparado para usarse con una base de datos PostgreSQL (ej. Supabase) y Prisma como ORM. Incluye rutas CRUD para `items` y un flujo básico de autenticación (registro/login) con bcrypt + JWT.
+
 ## Requisitos
 - Node.js 18+ (o 20+ recomendado)
 - Cuenta y proyecto en Supabase (o cualquier Postgres accesible)
