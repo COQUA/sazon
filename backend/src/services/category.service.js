@@ -6,18 +6,14 @@ import prisma from '../config/prisma.js';
  */
 export async function getAllCategories() {
   const categories = await prisma.category.findMany({
-<<<<<<< HEAD
     include: {
       investorPreferences: true,
       ventureCategories: true
     },
-=======
->>>>>>> 7c59cdff2dca68f4df5a55c949e780d2617986f1
     orderBy: {
       name: 'asc'
     }
   });
-<<<<<<< HEAD
   function convertBigInts(obj) {
     if (Array.isArray(obj)) return obj.map(convertBigInts);
     if (obj && typeof obj === 'object') {
@@ -32,14 +28,6 @@ export async function getAllCategories() {
     return obj;
   }
   return categories.map(convertBigInts);
-=======
-  
-  // Convertir BigInt a string para JSON
-  return categories.map(cat => ({
-    ...cat,
-    categoryId: cat.categoryId.toString()
-  }));
->>>>>>> 7c59cdff2dca68f4df5a55c949e780d2617986f1
 }
 
 /**
@@ -48,7 +36,6 @@ export async function getAllCategories() {
  */
 export async function getCategoryById(categoryId) {
   const category = await prisma.category.findUnique({
-<<<<<<< HEAD
     where: { categoryId: BigInt(categoryId) },
     include: {
       investorPreferences: true,
@@ -70,17 +57,6 @@ export async function getCategoryById(categoryId) {
     return obj;
   }
   return convertBigInts(category);
-=======
-    where: { categoryId: BigInt(categoryId) }
-  });
-  
-  if (!category) return null;
-  
-  return {
-    ...category,
-    categoryId: category.categoryId.toString()
-  };
->>>>>>> 7c59cdff2dca68f4df5a55c949e780d2617986f1
 }
 
 /**
