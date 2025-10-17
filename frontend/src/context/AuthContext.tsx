@@ -3,8 +3,8 @@ import type { ReactNode } from "react";
 
 export interface User {
     email: string;
-    password: string;
-    name: string;
+    name:string;
+    role:"entrepreneur" | "investor" | "admin";
 }
 
 interface AuthContextType {

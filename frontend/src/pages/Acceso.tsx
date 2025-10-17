@@ -9,7 +9,7 @@ export default function Acceso() {
 
         <div className="flex flex-col justify-center gap-5">
             <Link
-            to="/registro"
+            to="/register"
             className="bg-green-600 text-center hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-full transition-all duration-300"
             >
             Registrarse
