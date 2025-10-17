@@ -13,7 +13,7 @@ if (!Role.includes(role)) throw new Error('Rol invalido debe ser uno de los sigu
   const user = await prisma.user.create({ data: { email, password: hashed, name, role } });
 
   const token = jwt.sign(
-    { userId: user.id, role: user.role, email: user.email },
+    { userId: user.userId, role: user.role, email: user.email },
     JWT_SECRET,
     { expiresIn: '7d' }
   );
@@ -31,7 +31,7 @@ export async function login({ email, password }) {
   if (!ok) throw new Error('Credenciales invalidas');
 
   const token = jwt.sign(
-    { userId: user.id, role: user.role, email: user.email },
+    { userId: user.userId, role: user.role, email: user.email },
     JWT_SECRET,
     { expiresIn: '7d' }
   );

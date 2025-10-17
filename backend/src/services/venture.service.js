@@ -1,7 +1,7 @@
 import prisma from '../config/prisma.js';
 
 export async function list() {
-  return prisma.venture.findMany({
+  const ventures = await prisma.venture.findMany({
     include: {
       entrepreneur: true,
       ventureCategories: {
@@ -12,10 +12,24 @@ export async function list() {
     },
     orderBy: { createdAt: 'desc' }
   });
+  function convertBigInts(obj) {
+    if (Array.isArray(obj)) return obj.map(convertBigInts);
+    if (obj && typeof obj === 'object') {
+      const out = {};
+      for (const [k, v] of Object.entries(obj)) {
+        if (typeof v === 'bigint') out[k] = v.toString();
+        else if (Array.isArray(v) || (v && typeof v === 'object')) out[k] = convertBigInts(v);
+        else out[k] = v;
+      }
+      return out;
+    }
+    return obj;
+  }
+  return ventures.map(venture => convertBigInts(venture));
 }
 
 export async function get(id) {
-  return prisma.venture.findUnique({
+  const venture = await prisma.venture.findUnique({
     where: { ventureId: id },
     include: {
       entrepreneur: true,
@@ -26,35 +40,59 @@ export async function get(id) {
       }
     }
   });
+  if (!venture) return null;
+  function convertBigInts(obj) {
+    if (Array.isArray(obj)) return obj.map(convertBigInts);
+    if (obj && typeof obj === 'object') {
+      const out = {};
+      for (const [k, v] of Object.entries(obj)) {
+        if (typeof v === 'bigint') out[k] = v.toString();
+        else if (Array.isArray(v) || (v && typeof v === 'object')) out[k] = convertBigInts(v);
+        else out[k] = v;
+      }
+      return out;
+    }
+    return obj;
+  }
+  return convertBigInts(venture);
 }
 
 export async function create(payload) {
   const { categoryIds, ...ventureData } = payload;
-  
-
+  // Asignar fechaCreacion si no viene en el payload
+  if (!ventureData.fechaCreacion) {
+    ventureData.fechaCreacion = new Date();
+  }
+  function convertBigInts(obj) {
+    if (Array.isArray(obj)) return obj.map(convertBigInts);
+    if (obj && typeof obj === 'object') {
+      const out = {};
+      for (const [k, v] of Object.entries(obj)) {
+        if (typeof v === 'bigint') out[k] = v.toString();
+        else if (Array.isArray(v) || (v && typeof v === 'object')) out[k] = convertBigInts(v);
+        else out[k] = v;
+      }
+      return out;
+    }
+    return obj;
+  }
   return prisma.$transaction(async (prisma) => {
-
     const venture = await prisma.venture.create({
       data: {
         ...ventureData
       }
     });
-    
-
     if (categoryIds && categoryIds.length > 0) {
-
       for (const categoryId of categoryIds) {
         await prisma.ventureCategory.create({
           data: {
-            venture_id: venture.ventureId,
-            category_id: BigInt(categoryId)
+            ventureId: venture.ventureId,
+            categoryId: BigInt(categoryId)
           }
         });
       }
     }
-    
-
-    return prisma.venture.findUnique({
+    const result = await prisma.venture.findUnique({
       where: { ventureId: venture.ventureId },
       include: {
         entrepreneur: true,
@@ -65,6 +103,7 @@ export async function create(payload) {
         }
       }
     });
+    return convertBigInts(result);
   });
 }
 

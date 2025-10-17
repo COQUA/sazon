@@ -18,17 +18,16 @@ export async function create(req, res, next) {
     
 
     let entrepreneurId = req.user.userId;
-    
-
     if (req.user.role === 'admin' && req.body.entrepreneurId) {
       entrepreneurId = req.body.entrepreneurId;
     }
-    
+    if (!entrepreneurId) {
+      return res.status(400).json({ error: 'No se pudo determinar el entrepreneurId para el emprendimiento' });
+    }
     const ventureData = {
       ...req.body,
       entrepreneurId
     };
-    
     const venture = await service.create(ventureData);
     res.status(201).json(venture);
   } catch (error) { 
