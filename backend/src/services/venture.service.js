@@ -110,36 +110,49 @@ export async function create(payload) {
 export async function update(id, payload) {
   const { categoryIds, ...ventureData } = payload;
   
+  function convertBigInts(obj) {
+    if (Array.isArray(obj)) return obj.map(convertBigInts);
+    if (obj && typeof obj === 'object') {
+      const out = {};
+      for (const [k, v] of Object.entries(obj)) {
+        if (typeof v === 'bigint') out[k] = v.toString();
+        else if (Array.isArray(v) || (v && typeof v === 'object')) out[k] = convertBigInts(v);
+        else out[k] = v;
+      }
+      return out;
+    }
+    return obj;
+  }
 
   return prisma.$transaction(async (prisma) => {
-
+    // Actualizar datos del venture
     const venture = await prisma.venture.update({
       where: { ventureId: id },
       data: ventureData
     });
     
-
+    // Si se proporcionan categoryIds, actualizar las categorías
     if (categoryIds !== undefined) {
-
+      // Eliminar todas las categorías existentes
       await prisma.ventureCategory.deleteMany({
-        where: { venture_id: id }
+        where: { ventureId: id }
       });
       
-
+      // Agregar las nuevas categorías
       if (categoryIds && categoryIds.length > 0) {
         for (const categoryId of categoryIds) {
           await prisma.ventureCategory.create({
             data: {
-              venture_id: venture.ventureId,
-              category_id: BigInt(categoryId)
+              ventureId: venture.ventureId,
+              categoryId: BigInt(categoryId)
             }
           });
         }
       }
     }
     
-
-    return prisma.venture.findUnique({
+    // Retornar el venture actualizado con sus relaciones
+    const result = await prisma.venture.findUnique({
       where: { ventureId: venture.ventureId },
       include: {
         entrepreneur: true,
@@ -150,14 +163,18 @@ export async function update(id, payload) {
         }
       }
     });
+    
+    return convertBigInts(result);
   });
 }
 
 export async function remove(id) {
+  // Primero eliminar las categorías asociadas
   await prisma.ventureCategory.deleteMany({
     where: { ventureId: id }
   });
   
+  // Luego eliminar el venture
   await prisma.venture.delete({ 
     where: { ventureId: id } 
   });

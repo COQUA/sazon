@@ -6,14 +6,18 @@ import prisma from '../config/prisma.js';
  */
 export async function getAllCategories() {
   const categories = await prisma.category.findMany({
+<<<<<<< HEAD
     include: {
       investorPreferences: true,
       ventureCategories: true
     },
+=======
+>>>>>>> 7c59cdff2dca68f4df5a55c949e780d2617986f1
     orderBy: {
       name: 'asc'
     }
   });
+<<<<<<< HEAD
   function convertBigInts(obj) {
     if (Array.isArray(obj)) return obj.map(convertBigInts);
     if (obj && typeof obj === 'object') {
@@ -28,6 +32,14 @@ export async function getAllCategories() {
     return obj;
   }
   return categories.map(convertBigInts);
+=======
+  
+  // Convertir BigInt a string para JSON
+  return categories.map(cat => ({
+    ...cat,
+    categoryId: cat.categoryId.toString()
+  }));
+>>>>>>> 7c59cdff2dca68f4df5a55c949e780d2617986f1
 }
 
 /**
@@ -36,6 +48,7 @@ export async function getAllCategories() {
  */
 export async function getCategoryById(categoryId) {
   const category = await prisma.category.findUnique({
+<<<<<<< HEAD
     where: { categoryId: BigInt(categoryId) },
     include: {
       investorPreferences: true,
@@ -57,6 +70,17 @@ export async function getCategoryById(categoryId) {
     return obj;
   }
   return convertBigInts(category);
+=======
+    where: { categoryId: BigInt(categoryId) }
+  });
+  
+  if (!category) return null;
+  
+  return {
+    ...category,
+    categoryId: category.categoryId.toString()
+  };
+>>>>>>> 7c59cdff2dca68f4df5a55c949e780d2617986f1
 }
 
 /**
@@ -66,7 +90,8 @@ export async function getCategoryById(categoryId) {
  */
 export async function createCategory(categoryData) {
   const { name } = categoryData;
-
+  
+  // Verificar que no exista ya una categoría con el mismo nombre
   const existingCategory = await prisma.category.findUnique({
     where: { name }
   });
@@ -75,9 +100,14 @@ export async function createCategory(categoryData) {
     throw new Error('Ya existe una categoría con ese nombre');
   }
   
-  return await prisma.category.create({
+  const category = await prisma.category.create({
     data: { name }
   });
+  
+  return {
+    ...category,
+    categoryId: category.categoryId.toString()
+  };
 }
 
 /**
@@ -88,7 +118,8 @@ export async function createCategory(categoryData) {
  */
 export async function updateCategory(categoryId, categoryData) {
   const { name } = categoryData;
-
+  
+  // Verificar que la categoría existe
   const existingCategory = await prisma.category.findUnique({
     where: { categoryId: BigInt(categoryId) }
   });
@@ -97,7 +128,7 @@ export async function updateCategory(categoryId, categoryData) {
     return null;
   }
   
-
+  // Si se proporciona un nuevo nombre, verificar que no esté duplicado
   if (name) {
     const duplicateCategory = await prisma.category.findUnique({
       where: { name }
@@ -108,10 +139,15 @@ export async function updateCategory(categoryId, categoryData) {
     }
   }
   
-  return await prisma.category.update({
+  const updatedCategory = await prisma.category.update({
     where: { categoryId: BigInt(categoryId) },
     data: { name }
   });
+  
+  return {
+    ...updatedCategory,
+    categoryId: updatedCategory.categoryId.toString()
+  };
 }
 
 /**
