@@ -90,7 +90,7 @@ export async function getInvestorProfile(userId) {
     include: {
       user: {
         select: {
-          user_id: true,
+          userId: true,
           name: true,
           email: true,
           role: true
@@ -154,7 +154,7 @@ export async function createInvestorProfile(userId, profileData) {
       include: {
         user: {
           select: {
-            user_id: true,
+            userId: true,
             name: true,
             email: true,
             role: true
@@ -242,7 +242,7 @@ export async function updateInvestorProfile(userId, profileData) {
       include: {
         user: {
           select: {
-            user_id: true,
+            userId: true,
             name: true,
             email: true,
             role: true
